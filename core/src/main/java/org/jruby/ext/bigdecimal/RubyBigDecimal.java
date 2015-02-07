@@ -929,9 +929,18 @@ public class RubyBigDecimal extends RubyNumeric {
         // MRI behavior: "If digits is 0, the result is the same as the / operator."
         if (scale == 0) return op_quo(context, other);
 
-        MathContext mathContext = new MathContext(scale, getRoundingMode(context.runtime));
-        return new RubyBigDecimal(context.runtime,
-                value.divide(val.value, mathContext)).setResult(scale);
+        if (isZero()) {
+            return newZero(getRuntime(), zeroSign * val.value.signum());
+        }
+
+        if (scale == 0) {
+            // MRI behavior: "If digits is 0, the result is the same as the / operator."
+            return op_quo(context, other);
+        } else {
+            MathContext mathContext = new MathContext(scale, getRoundingMode(context.runtime));
+            return new RubyBigDecimal(getRuntime(),
+                    value.divide(val.value, mathContext)).setResult(scale);
+        }
     }
     
     @JRubyMethod(name = "div")

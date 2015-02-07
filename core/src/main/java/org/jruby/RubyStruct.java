@@ -547,6 +547,7 @@ public class RubyStruct extends RubyObject {
     private IRubyObject inspectStruct(final ThreadContext context, boolean recur) {
         Ruby runtime = context.runtime;
         RubyArray member = __member__();
+<<<<<<< HEAD
         ByteList buffer = new ByteList("#<struct ".getBytes());
         String cpath = getMetaClass().getRealClass().getName();
         char first = cpath.charAt(0);
@@ -554,6 +555,14 @@ public class RubyStruct extends RubyObject {
         if (recur || first != '#') {
             buffer.append(cpath.getBytes());
             buffer.append(' ');
+=======
+        RubyString buffer = RubyString.newString(getRuntime(), new ByteList("#<struct ".getBytes()));
+
+        if (is1_8() || getMetaClass().getRealClass().getBaseName() != null) {
+            String className = getMetaClass().getRealClass().getRealClass().getName();
+            buffer.append(RubyString.newString(getRuntime(), new ByteList(className.getBytes())));
+            buffer.cat(' ');
+>>>>>>> jruby-1_7
         }
 
         if (recur) {
@@ -562,6 +571,7 @@ public class RubyStruct extends RubyObject {
         }
 
         for (int i = 0,k=member.getLength(); i < k; i++) {
+<<<<<<< HEAD
             if (i > 0) {
                 buffer.append(',').append(' ');
             }
@@ -574,10 +584,23 @@ public class RubyStruct extends RubyObject {
             }
             buffer.append('=');
             buffer.append(inspect(context, values[i]).getByteList());
+=======
+            if (i > 0) buffer.cat(',').cat(' ');
+            // FIXME: MRI has special case for constants here
+            if (is1_8()) {
+                buffer.cat(RubyString.objAsString(context, member.eltInternal(i)));
+                buffer.cat('=');
+                buffer.cat(inspect(context, values[i]));
+            } else {
+                buffer.cat19(RubyString.objAsString(context, member.eltInternal(i)));
+                buffer.cat('=');
+                buffer.cat19(inspect(context, values[i]));
+            }
+>>>>>>> jruby-1_7
         }
 
-        buffer.append('>');
-        return getRuntime().newString(buffer); // OBJ_INFECT
+        buffer.cat('>');
+        return buffer.dup(); // OBJ_INFECT
     }
 
     @JRubyMethod(name = {"inspect", "to_s"})
