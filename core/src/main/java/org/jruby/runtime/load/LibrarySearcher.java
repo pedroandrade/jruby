@@ -143,8 +143,10 @@ class LibrarySearcher {
         }
 
         // load the jruby kernel and all resource added to $CLASSPATH
-        FoundLibrary library = findFileResourceWithLoadPath(baseName, suffix, URLResource.URI_CLASSLOADER);
-        if (library != null) return library;
+        if (!runtime.getInstanceConfig().isLegacyLoadServiceEnabled()) {
+            FoundLibrary library = findFileResourceWithLoadPath(baseName, suffix, URLResource.URI_CLASSLOADER);
+            if (library != null) return library;
+        }
 
         return null;
     }
@@ -284,7 +286,12 @@ class LibrarySearcher {
                     }
                 }
                 if ( url != null ) {
-                    runtime.getJRubyClassLoader().addURL(url);
+                    if (runtime.getInstanceConfig().isLegacyLoadServiceEnabled()) {
+                        runtime.getJRubyClassLoader().addURL(url);
+                    }
+                    else {
+                        runtime.getJRubyClassLoader().addURLNoIndex(url);
+                    }
                 }
             } catch (MalformedURLException badUrl) {
                 runtime.newIOErrorFromException(badUrl);

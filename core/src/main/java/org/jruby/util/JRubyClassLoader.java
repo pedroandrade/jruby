@@ -117,6 +117,8 @@ public class JRubyClassLoader extends ClassDefininngJRubyClassLoader {
     @Override
     public void addURL(URL url) {
         super.addURL(url);
+        // TODO (mkristian) once legacy load service is gone this method can be removed complete and/or 
+        // refactored with addURLNoIndex
         indexJarContents(url);
     }
 
