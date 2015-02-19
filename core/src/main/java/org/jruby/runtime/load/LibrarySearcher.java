@@ -144,6 +144,18 @@ class LibrarySearcher {
 
         // load the jruby kernel and all resource added to $CLASSPATH
         if (!runtime.getInstanceConfig().isLegacyLoadServiceEnabled()) {
+
+            // inside a classloader the path "." is the place where to find the jruby kernel
+            if (!runtime.getCurrentDirectory().startsWith(URLResource.URI_CLASSLOADER)) {
+
+                // ruby does not load a relative path unless the current working directory is in $LOAD_PATH
+                FoundLibrary library = findFileResourceWithLoadPath(baseName, suffix, ".");
+
+                // we did not find the file on the $LOAD_PATH but in current directory so we need to treat it
+                // as not found (the classloader search below will find it otherwise)
+                if (library != null) return null;
+            }
+
             FoundLibrary library = findFileResourceWithLoadPath(baseName, suffix, URLResource.URI_CLASSLOADER);
             if (library != null) return library;
         }

@@ -46,6 +46,14 @@ class TestLoad < Test::Unit::TestCase
     assert $loaded_foo_bar
   end
 
+  def test_require_without_current_dir_in_load_path
+    $LOAD_PATH.delete '.'
+    assert_raises(LoadError) { require('test/jruby/dummy') }
+    assert require('./test/jruby/dummy')
+  ensure
+    $LOAD_PATH << '.'
+  end
+
   # JRUBY-3231
   def test_load_with_empty_string_in_loadpath
     begin
@@ -198,15 +206,7 @@ DEPS
 
     res = File.expand_path($loading_behavior_result)
 
-    assert_equal File.join(prefix, 'test_loading_behavior.rb'), res
-  end
-
-  def prefix
-    if JRuby.runtime.instance_config.legacy_load_service_enabled? || IS_JAR_EXECUTION
-      File.expand_path('test/jruby')
-    else
-      'uri:classloader:/test/jruby'
-    end
+    assert_equal File.join(File.expand_path('test/jruby'), 'test_loading_behavior.rb'), res
   end
 
   # JRUBY-3894

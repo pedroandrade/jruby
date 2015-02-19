@@ -18,7 +18,7 @@ namespace :spec do
     mspec :compile_mode => "OFF",
           :format => 's',
           :spec_target => ":fast",
-          :jruby_opts => "--dev"
+          :jruby_opts => "-I. --dev"
   end
 
   desc "Run rubyspecs expected to pass"
